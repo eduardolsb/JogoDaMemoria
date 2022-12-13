@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Jogo da Memoria</title>
+    <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>-->
+</head>
+<body style="margin:0;padding:0;" onload="windowLoad();">
+
+    <div style="width:100%;height:100%;">
+
+		<div id="lbl_points" style="width: 510px;height: 20px;text-align: center;margin: 50px auto;font-weight: bold;font-size: 50px;"></div>
+		<div id="lbl_result" style="width: 510px;height: 20px;text-align: center;margin: 50px auto;font-weight: bold;font-size: 50px;">MENTALIZE</div>
+
+        <div style="width:510px;height:204px;margin:100px auto;border: solid 1px silver;">
+
+            <div id="btn_img0" onclick="viraCardUnidade(0);" style="width:100px;height:100px;float:left; cursor:pointer;border:solid 1px silver;"></div>
+            <div id="btn_img1" onclick="viraCardUnidade(1);" style="width:100px;height:100px;float:left; cursor:pointer;border:solid 1px silver;"></div>
+            <div id="btn_img2" onclick="viraCardUnidade(2);" style="width:100px;height:100px;float:left; cursor:pointer;border:solid 1px silver;"></div>
+            <div id="btn_img3" onclick="viraCardUnidade(3);" style="width:100px;height:100px;float:left; cursor:pointer;border:solid 1px silver;"></div>
+            <div id="btn_img4" onclick="viraCardUnidade(4);" style="width:100px;height:100px;float:left; cursor:pointer;border:solid 1px silver;"></div>
+            <div id="btn_img5" onclick="viraCardUnidade(5);" style="width:100px;height:100px;float:left; cursor:pointer;border:solid 1px silver;"></div>
+            <div id="btn_img6" onclick="viraCardUnidade(6);" style="width:100px;height:100px;float:left; cursor:pointer;border:solid 1px silver;"></div>
+            <div id="btn_img7" onclick="viraCardUnidade(7);" style="width:100px;height:100px;float:left; cursor:pointer;border:solid 1px silver;"></div>
+            <div id="btn_img8" onclick="viraCardUnidade(8);" style="width:100px;height:100px;float:left; cursor:pointer;border:solid 1px silver;"></div>
+            <div id="btn_img9" onclick="viraCardUnidade(9);" style="width:100px;height:100px;float:left; cursor:pointer;border:solid 1px silver;"></div>
+
+        </div>
+	
+		
+		<div id="block-click" style="width:100%;height:5000px;background:white;opacity:0;position:fixed;top:0px;left:0px;right:0px;bottom:0px;z-index:9999;">
+    </div>
+
+    <script type="text/javascript" defer="">
+
+        var tempoDeVisualizacao = 2;
+		
+		var countPOints = 0;
+
+        var cartas = [
+            { 'id': 0, 'imagem': "red" },
+            { 'id': 1, 'imagem': "orange" },
+            { 'id': 2, 'imagem': "green" },
+            { 'id': 3, 'imagem': "blue" },
+            { 'id': 4, 'imagem': "purple" }
+        ];
+
+        var cardsUsados = [];
+
+        var cardsDoUsuario = [];
+
+        var parOK = false;
+
+
+        var windowLoad = function () {
+			if(localStorage.getItem('total-game-memorize') == null){
+				countPOints = 0;
+			}else{
+				countPOints = parseInt(localStorage.getItem('total-game-memorize'));
+            }
+            function startGame() {
+
+                var keyPreencheu = false;
+
+                for (var i = 0; i < 10; i++) {
+
+                    while (keyPreencheu == false) {
+
+                        var rand = parseInt((Math.random() * 4).toFixed(0));
+
+                        var cardEscolhido = cardsUsados.filter(a => a.id == cartas[rand].id);
+
+                        if (cardEscolhido.length < 2) {
+
+                            cardsUsados.push({ 'id': cartas[rand].id, 'idDiv': i });
+
+                            document.getElementById('btn_img' + i).style.background = cartas[rand].imagem;
+                            document.getElementById('btn_img' + i).innerHTML = cartas[rand].imagem;
+
+                            console.log(cardEscolhido);
+
+                            keyPreencheu = true;
+                        }
+                    }
+
+                    keyPreencheu = false;
+
+                }
+
+                setTimeout(function () {
+                    viraCards();
+					document.getElementById('block-click').style.display = 'none';
+                }, tempoDeVisualizacao * 1000);
+
+            };
+
+            startGame();
+
+
+        }
+
+        function viraCards() {
+            for (var i = 0; i < 10; i++) {
+
+                document.getElementById('btn_img' + i).style.background = 'white';
+                document.getElementById('btn_img' + i).innerHTML = '';
+
+            }
+			
+			escreve(countPOints + ' pts');
+        }
+
+        function viraCardUnidade(div) {
+            var card = cardsUsados[div];
+
+            document.getElementById('btn_img' + card.idDiv).style.background = cartas.find(a => a.id == card.id).imagem;
+            document.getElementById('btn_img' + card.idDiv).innerHTML = cartas.find(a => a.id == card.id).imagem;
+			document.getElementById('btn_img' + card.idDiv).removeAttribute("onclick");
+
+            if (cardsDoUsuario.length == 0) {
+                cardsDoUsuario.push(card.id);
+                console.log(cardsDoUsuario);
+                return;
+            }
+
+            if (cardsDoUsuario.length == 9) {
+                cardsDoUsuario.push(card.id);
+                console.log(cardsDoUsuario);
+				countPOints = (countPOints + 10);
+                escreve('VC VENCEU - ' + countPOints + ' pts');
+				localStorage.setItem('total-game-memorize', countPOints);
+				document.getElementById('block-click').style.display = 'block';
+                return;
+            }
+
+            if (cardsDoUsuario.filter(a => a == card.id).length == 1 && cardsDoUsuario[cardsDoUsuario.length - 1] == card.id) {
+                cardsDoUsuario.push(card.id);
+                console.log(cardsDoUsuario);
+                parOK = true;
+                return;
+            }
+
+            if (cardsDoUsuario.filter(a => a == card.id).length == 1 && cardsDoUsuario[cardsDoUsuario.length - 1] != card.id && parOK == false) {
+                cardsDoUsuario.push(card.id);
+                console.log(cardsDoUsuario);
+				viraCardTodos();
+                escreve('PERDEU - ' + countPOints + ' pts');
+				countPOints = 0;
+				localStorage.setItem('total-game-memorize', countPOints);
+                return;
+            }
+
+            if (cardsDoUsuario.filter(a => a == card.id).length == 0 && cardsDoUsuario[cardsDoUsuario.length - 1] != card.id && parOK == false) {
+                cardsDoUsuario.push(card.id);
+                console.log(cardsDoUsuario);
+				viraCardTodos();
+                escreve('PERDEU - ' + countPOints + ' pts');
+				countPOints = 0;
+				localStorage.setItem('total-game-memorize', countPOints);
+                return;
+            }
+
+            parOK = false;
+            cardsDoUsuario.push(card.id);
+            console.log(cardsDoUsuario);
+        }
+		
+		function viraCardTodos() {
+			setTimeout(function () {
+				for (var i = 0; i < 10; i++) {
+
+					document.getElementById('btn_img' + cardsUsados[i].idDiv).style.background = cartas.find(a => a.id == cardsUsados[i].id).imagem;
+					document.getElementById('btn_img' + cardsUsados[i].idDiv).innerHTML = cartas.find(a => a.id == cardsUsados[i].id).imagem;
+					document.getElementById('btn_img' + cardsUsados[i].idDiv).removeAttribute("onclick");
+					document.getElementById('block-click').style.display = 'block';
+				}
+			},500);
+		}
+		
+		function escreve(text){
+			document.getElementById('lbl_result').innerHTML = text;
+		}
+    </script>
+
+</body>
+</html>
